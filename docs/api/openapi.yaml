@@ -1,0 +1,311 @@
+openapi: 3.1.0
+info:
+  title: Career Intelligence API
+  version: 1.0.0
+  description: Complete v1.0 API for authentication, verified candidate profile, private resume upload/parsing/versioning/export, job intelligence, deterministic 8-dimension ATS scoring, evidence-validated optimization, grounded cover letters, career development, application tracking, and privacy/GDPR controls.
+servers:
+  - url: http://localhost:8000/api/v1
+security:
+  - bearerAuth: []
+paths:
+  /health:
+    get:
+      summary: Liveness check
+      security: []
+      responses:
+        "200": { description: Healthy }
+  /health/ready:
+    get:
+      summary: Dependency readiness check
+      security: []
+      responses:
+        "200": { description: Readiness status }
+  /auth/register:
+    post:
+      summary: Register a candidate account
+      security: []
+      responses:
+        "201": { description: Account created }
+        "409": { description: Email already registered }
+  /auth/login:
+    post:
+      summary: Authenticate and receive bearer access/refresh tokens + HttpOnly cookies
+      security: []
+      responses:
+        "200": { description: Authenticated }
+        "401": { description: Invalid credentials }
+  /auth/refresh:
+    post:
+      summary: Rotate refresh token and issue new access token
+      security: []
+      responses:
+        "200": { description: Token rotated }
+  /auth/logout:
+    post:
+      summary: Revoke session and clear cookies
+      responses:
+        "204": { description: Logged out }
+  /auth/me:
+    get:
+      summary: Get authenticated account identity
+      responses:
+        "200": { description: Current user }
+  /dashboard/summary:
+    get:
+      summary: Retrieve overview KPIs, recent analyses, pipeline counts, and AI privacy status
+      responses:
+        "200": { description: Dashboard summary }
+  /profile:
+    get:
+      summary: Retrieve full verified candidate profile
+      responses:
+        "200": { description: Candidate profile }
+    put:
+      summary: Update core candidate profile metadata
+      responses:
+        "200": { description: Updated profile }
+  /profile/experiences:
+    post:
+      summary: Add verified work experience
+      responses:
+        "201": { description: Experience added }
+  /profile/education:
+    post:
+      summary: Add verified education entry
+      responses:
+        "201": { description: Education added }
+  /profile/skills:
+    post:
+      summary: Add verified skill
+      responses:
+        "201": { description: Skill added }
+  /profile/certifications:
+    post:
+      summary: Add verified certification
+      responses:
+        "201": { description: Certification added }
+  /resumes:
+    get:
+      summary: List user resumes
+      responses:
+        "200": { description: Resume summaries }
+    post:
+      summary: Create structured resume manually
+      responses:
+        "201": { description: Resume created }
+  /resumes/upload:
+    post:
+      summary: Direct authenticated multipart upload with validation, SHA-256 hashing, private storage, and optional parsing
+      responses:
+        "201": { description: Uploaded and parsed }
+  /resumes/upload-url:
+    post:
+      summary: Issue short-lived presigned private S3 PUT upload URL
+      responses:
+        "201": { description: Upload URL created }
+  /resumes/{resume_id}/complete:
+    post:
+      summary: Validate uploaded staging object and promote immutable bytes
+      responses:
+        "200": { description: Upload validated }
+  /resumes/{resume_id}/parse:
+    post:
+      summary: Parse uploaded resume file into structured content and ATS readability diagnostics
+      responses:
+        "200": { description: Resume parsed }
+  /resumes/{resume_id}:
+    get:
+      summary: Retrieve resume detail, parsed content, and version history
+      responses:
+        "200": { description: Resume detail }
+    put:
+      summary: Update resume title
+      responses:
+        "200": { description: Resume updated }
+    delete:
+      summary: Delete resume and private object storage file
+      responses:
+        "204": { description: Deleted }
+  /resumes/{resume_id}/versions:
+    get:
+      summary: List immutable versions
+      responses:
+        "200": { description: Version list }
+    post:
+      summary: Create a new immutable resume version
+      responses:
+        "201": { description: Version created }
+  /resumes/{resume_id}/versions/{version_id}/restore:
+    post:
+      summary: Restore a historical version as a new immutable version
+      responses:
+        "201": { description: Restored }
+  /resumes/{resume_id}/export:
+    get:
+      summary: Export watermark-free single-column ATS-safe PDF or DOCX
+      responses:
+        "200": { description: Exported binary document }
+  /jobs:
+    get:
+      summary: List saved job descriptions
+      responses:
+        "200": { description: Job list }
+    post:
+      summary: Save job description and extract required/preferred requirements
+      responses:
+        "201": { description: Job saved }
+  /jobs/{job_id}:
+    get:
+      summary: Retrieve job description and extracted criteria
+      responses:
+        "200": { description: Job record }
+    put:
+      summary: Update job description or user-corrected extracted requirements
+      responses:
+        "200": { description: Job updated }
+    delete:
+      summary: Delete job description
+      responses:
+        "204": { description: Deleted }
+  /jobs/{job_id}/analyze:
+    post:
+      summary: Re-run requirement extraction on job description
+      responses:
+        "200": { description: Extracted requirements }
+  /analyses:
+    get:
+      summary: List compatibility analyses
+      responses:
+        "200": { description: Analyses list }
+    post:
+      summary: Run deterministic 8-dimension ATS compatibility analysis and evidence-validated optimization
+      responses:
+        "201": { description: Analysis completed }
+  /analyses/{analysis_id}:
+    get:
+      summary: Retrieve compatibility report and recommendations
+      responses:
+        "200": { description: Analysis report }
+  /analyses/{analysis_id}/optimize:
+    post:
+      summary: Regenerate evidence-backed recommendations
+      responses:
+        "200": { description: Updated analysis }
+  /analyses/{analysis_id}/recommendations:
+    get:
+      summary: List recommendations for an analysis
+      responses:
+        "200": { description: Recommendations }
+  /analyses/{analysis_id}/recommendations/{rec_id}:
+    patch:
+      summary: Accept, edit, or reject a recommendation
+      responses:
+        "200": { description: Updated recommendation }
+  /cover-letters:
+    get:
+      summary: List cover letters
+      responses:
+        "200": { description: Cover letter list }
+    post:
+      summary: Generate grounded cover letter draft
+      responses:
+        "201": { description: Generated }
+  /cover-letters/generate:
+    post:
+      summary: Generate grounded cover letter draft (alias)
+      responses:
+        "201": { description: Generated }
+  /cover-letters/{letter_id}:
+    get:
+      summary: Retrieve cover letter
+      responses:
+        "200": { description: Cover letter }
+    put:
+      summary: Save edited cover letter (bumps version)
+      responses:
+        "200": { description: Updated }
+    delete:
+      summary: Delete cover letter
+      responses:
+        "204": { description: Deleted }
+  /cover-letters/{letter_id}/export:
+    get:
+      summary: Export cover letter as PDF, DOCX, or TXT
+      responses:
+        "200": { description: Binary document }
+  /career/overview:
+    get:
+      summary: Aggregated skill gaps, learning roadmap, and evidence-grounded interview questions
+      responses:
+        "200": { description: Career development overview }
+  /career/interview-prep:
+    post:
+      summary: Generate tailored interview questions for a saved job and candidate profile
+      responses:
+        "200": { description: Tailored interview questions }
+  /applications:
+    get:
+      summary: List applications and interview records
+      responses:
+        "200": { description: Applications }
+    post:
+      summary: Create application tracking record
+      responses:
+        "201": { description: Application created }
+  /applications/{application_id}:
+    get:
+      summary: Retrieve application
+      responses:
+        "200": { description: Application }
+    patch:
+      summary: Update application status, dates, or notes
+      responses:
+        "200": { description: Updated }
+    delete:
+      summary: Delete application
+      responses:
+        "204": { description: Deleted }
+  /applications/{application_id}/interviews:
+    post:
+      summary: Log interview record for an application
+      responses:
+        "201": { description: Interview created }
+  /privacy/settings:
+    get:
+      summary: Retrieve data retention and AI routing preferences
+      responses:
+        "200": { description: Privacy settings }
+    put:
+      summary: Update data retention and AI routing preferences
+      responses:
+        "200": { description: Updated }
+  /privacy/consents:
+    get:
+      summary: List consent history
+      responses:
+        "200": { description: Consent records }
+    post:
+      summary: Record consent grant or withdrawal
+      responses:
+        "201": { description: Consent recorded }
+  /privacy/audit-logs:
+    get:
+      summary: List user security activity log
+      responses:
+        "200": { description: Audit logs }
+  /account/export:
+    get:
+      summary: Export all personal data in portable JSON format
+      responses:
+        "200": { description: Full personal data export }
+  /account:
+    delete:
+      summary: Permanently delete account, database records, and private stored files
+      responses:
+        "204": { description: Account deleted }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
